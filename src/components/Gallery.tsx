@@ -1,5 +1,3 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface GalleryItem {
@@ -20,6 +18,8 @@ const normalizeKey = (value: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 
+const excludedImageKeys = new Set(['karaoke-images', 'hero-bg', 'live-music', 'news-mittag']);
+
 const localImageModules = import.meta.glob('../../images/*.{png,jpg,jpeg,webp,gif}', { eager: true, import: 'default' }) as Record<string, string>;
 const localImageEntries = Object.entries(localImageModules)
   .map(([path, url]) => ({
@@ -27,45 +27,33 @@ const localImageEntries = Object.entries(localImageModules)
     url,
     key: normalizeKey(path.split('/').pop()?.replace(/\.[^.]+$/, '') ?? ''),
   }))
-  .filter((entry) => entry.key.length > 0)
+  .filter((entry) => entry.key.length > 0 && !excludedImageKeys.has(entry.key))
   .sort((a, b) => a.path.localeCompare(b.path));
 
 const localImagesByKey = new Map(localImageEntries.map((e) => [e.key, e.url]));
 const localImages = localImageEntries.map((e) => e.url);
 
-const getLocalImageForItem = (item: GalleryItem) => {
-  const candidates = [item.title_de, item.title_it].map(normalizeKey).filter(Boolean);
-
-  for (const candidate of candidates) {
-    const exact = localImagesByKey.get(candidate);
-    if (exact) return exact;
-  }
-
-  for (const candidate of candidates) {
-    const partial = localImageEntries.find((e) => e.key.includes(candidate) || candidate.includes(e.key));
-    if (partial) return partial.url;
-  }
-
-  return undefined;
-};
+const humanizeTitle = (value: string) =>
+  value
+    .replace(/[-_]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 
 export function Gallery() {
   const { language, t } = useLanguage();
-  const [items, setItems] = useState<GalleryItem[]>([]);
-
-  useEffect(() => {
-    loadGallery();
-  }, []);
-
-  async function loadGallery() {
-    if (!supabase) return;
-    const { data } = await supabase
-      .from('gallery_items')
-      .select('*')
-      .order('display_order');
-
-    if (data) setItems(data);
-  }
+  const items: GalleryItem[] = localImageEntries.map((entry) => {
+    const base = entry.path.split('/').pop()?.replace(/\.[^.]+$/, '') ?? entry.key;
+    const title = humanizeTitle(base);
+    return {
+      id: entry.key,
+      image_url: entry.url,
+      title_de: title,
+      title_it: title,
+      description_de: '',
+      description_it: '',
+    };
+  });
 
   return (
     <section id="gallery" className="py-20 bg-gray-50">
@@ -81,7 +69,7 @@ export function Gallery() {
           {items.map((item, index) => (
             <div key={item.id} className="bg-white rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-300">
               <img
-                src={getLocalImageForItem(item) ?? localImages[index] ?? item.image_url}
+                src={localImagesByKey.get(normalizeKey(item.title_de)) ?? localImages[index] ?? item.image_url}
                 alt={language === 'de' ? item.title_de : item.title_it}
                 className="w-full h-64 object-cover"
               />
@@ -89,9 +77,9 @@ export function Gallery() {
                 <h3 className="text-xl font-bold mb-2 text-gray-900">
                   {language === 'de' ? item.title_de : item.title_it}
                 </h3>
-                <p className="text-gray-600">
-                  {language === 'de' ? item.description_de : item.description_it}
-                </p>
+                {(language === 'de' ? item.description_de : item.description_it) && (
+                  <p className="text-gray-600">{language === 'de' ? item.description_de : item.description_it}</p>
+                )}
               </div>
             </div>
           ))}

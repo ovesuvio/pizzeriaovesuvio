@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
 import { Calendar } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface NewsItem {
@@ -15,9 +13,10 @@ interface NewsItem {
 
 export function News() {
   const { language, t } = useLanguage();
-  const karaokeImageUrl = new URL('../../images/news-karaoke.svg', import.meta.url).href;
-  const liveMusicImageUrl = new URL('../../images/news-live-music.svg', import.meta.url).href;
-  const [news, setNews] = useState<NewsItem[]>([
+  const mittagImageUrl = new URL('../../news/news mittag.png', import.meta.url).href;
+  const karaokeImageUrl = new URL('../../news/karaoke images.png', import.meta.url).href;
+  const liveMusicImageUrl = new URL('../../news/live music.png', import.meta.url).href;
+  const news: NewsItem[] = [
     {
       id: 'news-1',
       title_de: '🍴 Mittagseröffnung ab Mai',
@@ -26,7 +25,7 @@ export function News() {
         'Ab Mai öffnet das Restaurant O’ Vesuvio auch mittags! Freut euch auf neue, frische und sommerliche Spezialitäten. Die neuen Öffnungszeiten veröffentlichen wir bald.',
       content_it:
         'Da maggio il ristorante O’ Vesuvio apre anche a pranzo! Vi aspettano nuove specialità fresche e estive. Pubblicheremo presto i nuovi orari di apertura.',
-      image_url: null,
+      image_url: mittagImageUrl,
       published_at: new Date().toISOString(),
     },
     {
@@ -49,51 +48,7 @@ export function News() {
       image_url: liveMusicImageUrl,
       published_at: new Date().toISOString(),
     },
-  ]);
-
-  useEffect(() => {
-    loadNews();
-  }, []);
-
-  async function loadNews() {
-    if (!supabase) return;
-    const { data } = await supabase
-      .from('news')
-      .select('*')
-      .order('published_at', { ascending: false })
-      .limit(6);
-
-    if (data) {
-      const updated = [...(data as NewsItem[])];
-      if (updated[0]) {
-        updated[0] = {
-          ...updated[0],
-          title_de: '🍴 Mittagseröffnung ab Mai',
-          content_de:
-            'Ab Mai öffnet das Restaurant O’ Vesuvio auch mittags! Freut euch auf neue, frische und sommerliche Spezialitäten. Die neuen Öffnungszeiten veröffentlichen wir bald.',
-        };
-      }
-      if (updated[1]) {
-        updated[1] = {
-          ...updated[1],
-          title_de: '🎤 Sing mit uns – Karaoke-Abende bald verfügbar',
-          content_de:
-            'Bald veröffentlichen wir die neuen Termine und Zeiten für unsere Karaoke-Abende! Kommt vorbei und habt Spaß beim Singen!',
-          image_url: karaokeImageUrl,
-        };
-      }
-      if (updated[2]) {
-        updated[2] = {
-          ...updated[2],
-          title_de: '🎵 Bald: Live-Musik im O’ Vesuvio',
-          content_de:
-            'Wir planen aktuell tolle Abende mit Live-Musik! Die Termine geben wir in Kürze bekannt.',
-          image_url: new URL('../../images/news-live-music.svg', import.meta.url).href,
-        };
-      }
-      setNews(updated);
-    }
-  }
+  ];
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString(language === 'de' ? 'de-DE' : 'it-IT', {

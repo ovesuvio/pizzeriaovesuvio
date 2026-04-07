@@ -30,7 +30,12 @@ export function Footer() {
               <a href="#" className="text-gray-400 hover:text-white transition">
                 <Facebook className="w-6 h-6" />
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition">
+              <a
+                href="https://www.instagram.com/o_vesuvio_manzen_gp/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-gray-400 hover:text-white transition"
+              >
                 <Instagram className="w-6 h-6" />
               </a>
             </div>

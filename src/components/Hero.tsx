@@ -10,7 +10,7 @@ export function Hero() {
   const { t } = useLanguage();
 
   return (
-    <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[50vh] py-10 flex items-center justify-center">
       {heroBackgroundUrl && (
         <div className="absolute inset-0 bg-center bg-cover" style={{ backgroundImage: `url(${heroBackgroundUrl})` }} />
       )}

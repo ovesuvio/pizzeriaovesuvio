@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { MapPin, Phone, Mail, Clock } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export function Contact() {
@@ -21,44 +20,33 @@ export function Contact() {
     e.preventDefault();
     setError('');
 
-    if (!supabase) {
-      setError(
-        t(
-          'Online-Reservierungen sind derzeit nicht verfügbar. Bitte rufen Sie uns an oder schreiben Sie uns eine E-Mail.',
-          'Le prenotazioni online non sono disponibili al momento. Ti preghiamo di chiamarci o inviarci un’e-mail.',
-        ),
-      );
-      return;
-    }
+    const subject = encodeURIComponent('Reservierung / Prenotazione');
+    const body = encodeURIComponent(
+      [
+        `Name: ${formData.name}`,
+        `Email: ${formData.email}`,
+        `Telefon: ${formData.phone}`,
+        `Datum: ${formData.date}`,
+        `Uhrzeit: ${formData.time}`,
+        `Personen: ${formData.guests}`,
+        formData.notes ? `Wünsche/Note: ${formData.notes}` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    );
 
-    const { error: insertError } = await supabase
-      .from('reservations')
-      .insert([{
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        date: formData.date,
-        time: formData.time,
-        guests: formData.guests,
-        notes: formData.notes,
-        status: 'pending'
-      }]);
-
-    if (insertError) {
-      setError(t('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.', 'Si è verificato un errore. Riprova.'));
-    } else {
-      setSubmitted(true);
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        date: '',
-        time: '',
-        guests: 2,
-        notes: ''
-      });
-      setTimeout(() => setSubmitted(false), 5000);
-    }
+    window.location.href = `mailto:pizzeriaristoranteovesuvio@gmail.com?subject=${subject}&body=${body}`;
+    setSubmitted(true);
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      date: '',
+      time: '',
+      guests: 2,
+      notes: '',
+    });
+    setTimeout(() => setSubmitted(false), 5000);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
