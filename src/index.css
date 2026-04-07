@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .typewriter {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    border-right: 0.12em solid rgba(255, 255, 255, 0.9);
+    width: 0;
+    animation: typewriter-cycle 5s steps(19, end) infinite, typewriter-caret 0.8s step-end infinite;
+  }
+}
+
+@keyframes typewriter-cycle {
+  0% {
+    width: 0;
+  }
+  40% {
+    width: 19ch;
+  }
+  60% {
+    width: 19ch;
+  }
+  100% {
+    width: 0;
+  }
+}
+
+@keyframes typewriter-caret {
+  0%,
+  100% {
+    border-color: transparent;
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 0.9);
+  }
+}
