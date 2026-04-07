@@ -15,13 +15,48 @@ interface NewsItem {
 
 export function News() {
   const { language, t } = useLanguage();
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const karaokeImageUrl = new URL('../../images/news-karaoke.svg', import.meta.url).href;
+  const liveMusicImageUrl = new URL('../../images/news-live-music.svg', import.meta.url).href;
+  const [news, setNews] = useState<NewsItem[]>([
+    {
+      id: 'news-1',
+      title_de: '🍴 Mittagseröffnung ab Mai',
+      title_it: '🍴 Apertura pranzo da maggio',
+      content_de:
+        'Ab Mai öffnet das Restaurant O’ Vesuvio auch mittags! Freut euch auf neue, frische und sommerliche Spezialitäten. Die neuen Öffnungszeiten veröffentlichen wir bald.',
+      content_it:
+        'Da maggio il ristorante O’ Vesuvio apre anche a pranzo! Vi aspettano nuove specialità fresche e estive. Pubblicheremo presto i nuovi orari di apertura.',
+      image_url: null,
+      published_at: new Date().toISOString(),
+    },
+    {
+      id: 'news-2',
+      title_de: '🎤 Sing mit uns – Karaoke-Abende bald verfügbar',
+      title_it: '🎤 Karaoke presto disponibile',
+      content_de:
+        'Bald veröffentlichen wir die neuen Termine und Zeiten für unsere Karaoke-Abende! Kommt vorbei und habt Spaß beim Singen!',
+      content_it:
+        'Presto pubblicheremo le nuove date e gli orari per le nostre serate karaoke! Passa a divertirti cantando!',
+      image_url: karaokeImageUrl,
+      published_at: new Date().toISOString(),
+    },
+    {
+      id: 'news-3',
+      title_de: '🎵 Bald: Live-Musik im O’ Vesuvio',
+      title_it: '🎵 Presto: musica dal vivo',
+      content_de: 'Wir planen aktuell tolle Abende mit Live-Musik! Die Termine geben wir in Kürze bekannt.',
+      content_it: 'Stiamo organizzando fantastiche serate con musica dal vivo! Annunceremo presto le date.',
+      image_url: liveMusicImageUrl,
+      published_at: new Date().toISOString(),
+    },
+  ]);
 
   useEffect(() => {
     loadNews();
   }, []);
 
   async function loadNews() {
+    if (!supabase) return;
     const { data } = await supabase
       .from('news')
       .select('*')
@@ -30,7 +65,6 @@ export function News() {
 
     if (data) {
       const updated = [...(data as NewsItem[])];
-      const karaokeImageUrl = new URL('../../images/news-karaoke.svg', import.meta.url).href;
       if (updated[0]) {
         updated[0] = {
           ...updated[0],

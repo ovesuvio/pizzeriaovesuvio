@@ -58,6 +58,7 @@ export function Gallery() {
   }, []);
 
   async function loadGallery() {
+    if (!supabase) return;
     const { data } = await supabase
       .from('gallery_items')
       .select('*')

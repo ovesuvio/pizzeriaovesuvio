@@ -21,6 +21,16 @@ export function Contact() {
     e.preventDefault();
     setError('');
 
+    if (!supabase) {
+      setError(
+        t(
+          'Online-Reservierungen sind derzeit nicht verfügbar. Bitte rufen Sie uns an oder schreiben Sie uns eine E-Mail.',
+          'Le prenotazioni online non sono disponibili al momento. Ti preghiamo di chiamarci o inviarci un’e-mail.',
+        ),
+      );
+      return;
+    }
+
     const { error: insertError } = await supabase
       .from('reservations')
       .insert([{
