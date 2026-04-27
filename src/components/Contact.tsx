@@ -15,38 +15,51 @@ export function Contact() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
 
-    const subject = encodeURIComponent('Reservierung / Prenotazione');
-    const body = encodeURIComponent(
-      [
-        `Name: ${formData.name}`,
-        `Email: ${formData.email}`,
-        `Telefon: ${formData.phone}`,
-        `Datum: ${formData.date}`,
-        `Uhrzeit: ${formData.time}`,
-        `Personen: ${formData.guests}`,
-        formData.notes ? `Wünsche/Note: ${formData.notes}` : '',
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    );
+    try {
+      const response = await fetch('/api/reservation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
 
-    window.location.href = `mailto:pizzeriaristoranteovesuvio@gmail.com?subject=${subject}&body=${body}`;
-    setSubmitted(true);
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      date: '',
-      time: '',
-      guests: 2,
-      notes: '',
-    });
-    setTimeout(() => setSubmitted(false), 5000);
+      if (!response.ok) {
+        setError(
+          t(
+            'Ein Fehler ist aufgetreten. Bitte rufen Sie uns an oder versuchen Sie es später erneut.',
+            'Si è verificato un errore. Ti preghiamo di chiamarci o riprovare più tardi.',
+          ),
+        );
+        return;
+      }
+
+      setSubmitted(true);
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        date: '',
+        time: '',
+        guests: 2,
+        notes: '',
+      });
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch {
+      setError(
+        t(
+          'Ein Fehler ist aufgetreten. Bitte rufen Sie uns an oder versuchen Sie es später erneut.',
+          'Si è verificato un errore. Ti preghiamo di chiamarci o riprovare più tardi.',
+        ),
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -256,9 +269,10 @@ export function Contact() {
 
               <button
                 type="submit"
-                className="w-full bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition"
+                disabled={submitting}
+                className="w-full bg-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {t('Reservierung absenden', 'Invia prenotazione')}
+                {submitting ? t('Senden…', 'Invio…') : t('Reservierung absenden', 'Invia prenotazione')}
               </button>
             </form>
           </div>
